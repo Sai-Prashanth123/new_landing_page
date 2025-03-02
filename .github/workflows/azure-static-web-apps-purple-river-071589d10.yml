@@ -27,16 +27,21 @@ jobs:
       - name: Clean Install Dependencies
         run: |
           rm -rf node_modules package-lock.json .next
-          npm install
+          npm ci --omit=dev  # ✅ Only installs production dependencies
 
       - name: Force Reinstall Next.js
         run: npm install next@latest --force
 
       - name: Debug Installed Modules
-        run: ls -la node_modules/next/dist/lib/typescript
+        run: ls -la node_modules/next/dist/lib/typescript || echo "Module not found"
 
       - name: Build Next.js Project
         run: npm run build
+
+      - name: Optimize Build Output
+        run: |
+          rm -rf .next/cache  # ✅ Removes unnecessary cache files
+          du -sh .next  # ✅ Check the size of the output
 
       - name: Deploy to Azure Static Web Apps
         id: builddeploy
@@ -45,9 +50,10 @@ jobs:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           action: "upload"
-          app_location: "/"
-          api_location: ""
+          app_location: "/" 
+          api_location: ""  # ✅ No API location to avoid unnecessary uploads
           output_location: ".next"
+          skip_api_build: true  # ✅ Skips API build if not needed (reduces size)
 
   close_pull_request_job:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
