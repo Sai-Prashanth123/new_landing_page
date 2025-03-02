@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Build and Deploy Job
     steps:
-      - name: Checkout repository
+      - name: Checkout Repository
         uses: actions/checkout@v3
 
       - name: Setup Node.js
@@ -25,14 +25,23 @@ jobs:
           cache: "npm"
 
       - name: Install Dependencies
-        run: npm install --legacy-peer-deps
+        run: |
+          rm -rf node_modules package-lock.json .next
+          npm install --legacy-peer-deps
+
+      - name: Optimize Dependencies
+        run: |
+          npm prune --production  # ✅ Removes devDependencies
+          du -sh node_modules  # ✅ Shows final size
+
+      - name: Check for Large Files
+        run: du -sh .next
 
       - name: Build Project
         run: |
           export NEXT_DISABLE_SOURCEMAPS=1  # ✅ Reduces build size
           npm run build
           du -sh .next  # ✅ Shows final build size
-          ls -R .next   # ✅ Lists all files in the build
 
       - name: Deploy to Azure Static Web Apps
         id: builddeploy
@@ -41,11 +50,10 @@ jobs:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           action: "upload"
-          app_location: "."  # ✅ Change to "src" if needed
+          app_location: "."  # ✅ Ensure this points to the correct build location
           api_location: ""  
           output_location: ".next"
-          skip_api_build: true  
-  
+          skip_api_build: true  # ✅ Ensures no unnecessary API deployment
 
   close_pull_request_job:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
