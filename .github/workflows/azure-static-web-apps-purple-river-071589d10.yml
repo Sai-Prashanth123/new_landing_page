@@ -24,26 +24,18 @@ jobs:
           node-version: 18
           cache: "npm"
 
-      - name: Ensure Correct Dependencies
+      - name: Install Dependencies
         run: |
           rm -rf node_modules package-lock.json .next
-          npm install --omit=dev # ✅ Install only production dependencies
+          npm install --legacy-peer-deps  # ✅ Ensures compatibility with all dependencies
 
-      - name: Check for Case Sensitivity Issues
+      - name: Check Case Sensitivity Issues
         run: |
-          find . -type f | grep -i "footer"
-          find . -type f | grep -i "navbar"
+          ls -R src/components || echo "src/components directory not found!" 
+          ls -R src/pages || echo "src/pages directory not found!" 
 
       - name: Validate TypeScript Paths
         run: cat tsconfig.json | grep paths  # ✅ Debug alias paths
-
-      - name: Fix Next.js Path Issues
-        run: |
-          echo "Ensuring correct component paths..."
-          if [ ! -d "src/components" ]; then
-            echo "Warning: src/components does not exist. Checking alternative paths..."
-            ls -R | grep "components"
-          fi
 
       - name: Build Project
         run: |
@@ -57,10 +49,10 @@ jobs:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           action: "upload"
-          app_location: "/" 
-          api_location: ""  # ✅ No API location to avoid unnecessary uploads
+          app_location: "src" 
+          api_location: ""  
           output_location: ".next"
-          skip_api_build: true  # ✅ Skips API build to reduce size
+          skip_api_build: true  
 
   close_pull_request_job:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
