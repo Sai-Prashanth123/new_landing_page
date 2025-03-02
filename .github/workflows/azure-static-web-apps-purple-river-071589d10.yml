@@ -25,20 +25,14 @@ jobs:
           cache: "npm"
 
       - name: Install Dependencies
-        run: npm install --legacy-peer-deps  # ✅ Ensures compatibility with dependencies
-
-      - name: Check Case Sensitivity Issues
-        run: |
-          ls -R components || echo "components directory not found!" 
-          ls -R pages || echo "pages directory not found!" 
-
-      - name: Debug TypeScript Paths
-        run: cat tsconfig.json  # ✅ Logs full tsconfig.json for debugging
+        run: npm install --legacy-peer-deps
 
       - name: Build Project
         run: |
-          export NEXT_DISABLE_SOURCEMAPS=1  # ✅ Reduce build size
+          export NEXT_DISABLE_SOURCEMAPS=1  # ✅ Reduces build size
           npm run build
+          du -sh .next  # ✅ Shows final build size
+          ls -R .next   # ✅ Lists all files in the build
 
       - name: Deploy to Azure Static Web Apps
         id: builddeploy
@@ -47,10 +41,11 @@ jobs:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           action: "upload"
-          app_location: "."  # ✅ Set to root, change to "src" if needed
+          app_location: "."  # ✅ Change to "src" if needed
           api_location: ""  
           output_location: ".next"
           skip_api_build: true  
+  
 
   close_pull_request_job:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
