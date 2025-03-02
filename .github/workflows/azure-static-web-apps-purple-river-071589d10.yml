@@ -31,22 +31,20 @@ jobs:
             npm install
           fi
 
-      - name: Install Dependencies (Exclude Dev)
+      - name: Install Dependencies (Production Only)
         run: npm ci --omit=dev  # ✅ Ensures smaller build size
 
-      - name: Remove Unused Packages & Cache
+      - name: Remove Unnecessary Files & Cache
         run: |
           rm -rf node_modules/.cache  # ✅ Remove cache
+          rm -rf node_modules/@types  # ✅ Remove TypeScript definitions
           npm prune --production  # ✅ Keep only production packages
-
-      - name: Force Reinstall Next.js (Fix for Missing Modules)
-        run: npm install next@latest --force
 
       - name: Optimize Next.js Build
         run: |
-          export NEXT_DISABLE_SOURCEMAPS=1  # ✅ Reduces build size
+          export NEXT_DISABLE_SOURCEMAPS=1  # ✅ Reduce build size
           npm run build
-          rm -rf .next/cache  # ✅ Remove build cache to reduce size
+          rm -rf .next/cache  # ✅ Remove build cache
           du -sh .next  # ✅ Show final build size
 
       - name: Deploy to Azure Static Web Apps
@@ -56,7 +54,7 @@ jobs:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           action: "upload"
-          app_location: "/"
+          app_location: "/" 
           api_location: ""  # ✅ No API location to avoid unnecessary uploads
           output_location: ".next"
           skip_api_build: true  # ✅ Skips API build to reduce size
