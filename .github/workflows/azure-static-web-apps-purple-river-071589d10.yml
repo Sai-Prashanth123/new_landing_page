@@ -29,19 +29,20 @@ jobs:
           rm -rf node_modules package-lock.json .next
           npm install --legacy-peer-deps
 
-      - name: Optimize Dependencies
-        run: |
-          npm prune --production  # ✅ Removes devDependencies
-          du -sh node_modules  # ✅ Shows final size
-
-      - name: Check for Large Files
-        run: du -sh .next
-
       - name: Build Project
         run: |
-          export NEXT_DISABLE_SOURCEMAPS=1  # ✅ Reduces build size
-          npm run build
-          du -sh .next  # ✅ Shows final build size
+          export NEXT_DISABLE_SOURCEMAPS=1  # ✅ Reduce build size
+          npm run build || { echo "Build failed. Check logs above."; exit 1; } # ✅ Fail fast if build fails
+
+      - name: Check `.next` Folder Exists
+        run: |
+          if [ -d ".next" ]; then
+            echo "✅ .next folder exists. Proceeding..."
+            du -sh .next  # ✅ Show size only if exists
+          else
+            echo "❌ .next folder not found! Build may have failed."
+            exit 1  # ✅ Stop deployment if build failed
+          fi
 
       - name: Deploy to Azure Static Web Apps
         id: builddeploy
