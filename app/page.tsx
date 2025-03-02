@@ -12,6 +12,12 @@ import MasonryCarousel from "@/components/Testimonial";
 import Faq from "@/components/Faq";
 import type { Metadata } from "next";
 
+// ✅ Move viewport outside metadata
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+};
+
 export const metadata: Metadata = {
   title: "JobSpring | AI-Powered Job Search Tools & Career Resources",
   description:
