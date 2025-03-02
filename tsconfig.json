@@ -4,21 +4,21 @@
     "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
-    "strict": true,  // ✅ Set to `true` for better TypeScript checks
-    "noEmit": true,  // ✅ Prevents emitting compiled files
+    "strict": true, 
+    "noEmit": true, 
     "esModuleInterop": true,
     "module": "esnext",
-    "moduleResolution": "node",  // ✅ Changed to `node` for better compatibility
+    "moduleResolution": "node", 
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "preserve",
     "incremental": true,
-    "baseUrl": "src",  // ✅ Updated to "src" to match project structure
+    "baseUrl": ".",  
     "paths": {
-      "@/*": ["*"],  // ✅ Root alias
-      "@/components/*": ["components/*"],  // ✅ Components alias
-      "@/utils/*": ["utils/*"],  // ✅ Utilities alias
-      "@/styles/*": ["styles/*"]  // ✅ Styles alias
+      "@/*": ["./src/*"], 
+      "@/components/*": ["./src/components/*"], 
+      "@/utils/*": ["./src/utils/*"],  
+      "@/styles/*": ["./src/styles/*"]  
     },
     "plugins": [{ "name": "next" }]
   },
