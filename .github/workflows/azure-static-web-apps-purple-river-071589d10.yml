@@ -24,28 +24,21 @@ jobs:
           node-version: 18
           cache: "npm"
 
-      - name: Ensure package-lock.json exists
+      - name: Clean Install Dependencies
         run: |
-          if [ ! -f package-lock.json ]; then
-            echo "⚠️ package-lock.json missing. Running npm install to generate it..."
-            npm install
-          fi
+          rm -rf node_modules package-lock.json .next
+          npm install --omit=dev  # ✅ Install only production dependencies
 
-      - name: Install Dependencies (Production Only)
-        run: npm ci --omit=dev  # ✅ Ensures smaller build size
+      - name: Validate Path Aliases
+        run: cat tsconfig.json | grep paths  # ✅ Debug paths
 
-      - name: Remove Unnecessary Files & Cache
-        run: |
-          rm -rf node_modules/.cache  # ✅ Remove cache
-          rm -rf node_modules/@types  # ✅ Remove TypeScript definitions
-          npm prune --production  # ✅ Keep only production packages
+      - name: Ensure Case-Sensitivity Fix
+        run: find components -type f | grep -i "footer"
 
-      - name: Optimize Next.js Build
+      - name: Build Project
         run: |
           export NEXT_DISABLE_SOURCEMAPS=1  # ✅ Reduce build size
           npm run build
-          rm -rf .next/cache  # ✅ Remove build cache
-          du -sh .next  # ✅ Show final build size
 
       - name: Deploy to Azure Static Web Apps
         id: builddeploy
