@@ -31,22 +31,23 @@ jobs:
             npm install
           fi
 
-      - name: Clean Install Dependencies
-        run: npm ci --omit=dev  # ✅ Runs only if package-lock.json exists
+      - name: Install Dependencies (Exclude Dev)
+        run: npm ci --omit=dev  # ✅ Ensures smaller build size
 
-      - name: Force Reinstall Next.js (Fix for missing modules)
+      - name: Remove Unused Packages & Cache
+        run: |
+          rm -rf node_modules/.cache  # ✅ Remove cache
+          npm prune --production  # ✅ Keep only production packages
+
+      - name: Force Reinstall Next.js (Fix for Missing Modules)
         run: npm install next@latest --force
 
-      - name: Debug Installed Modules
-        run: ls -la node_modules/next/dist/lib/typescript || echo "Module not found"
-
-      - name: Build Next.js Project
-        run: npm run build
-
-      - name: Optimize Build Output
+      - name: Optimize Next.js Build
         run: |
-          rm -rf .next/cache  # ✅ Removes unnecessary cache files
-          du -sh .next  # ✅ Check the size of the output
+          export NEXT_DISABLE_SOURCEMAPS=1  # ✅ Reduces build size
+          npm run build
+          rm -rf .next/cache  # ✅ Remove build cache to reduce size
+          du -sh .next  # ✅ Show final build size
 
       - name: Deploy to Azure Static Web Apps
         id: builddeploy
@@ -58,7 +59,7 @@ jobs:
           app_location: "/"
           api_location: ""  # ✅ No API location to avoid unnecessary uploads
           output_location: ".next"
-          skip_api_build: true  # ✅ Skips API build if not needed (reduces size)
+          skip_api_build: true  # ✅ Skips API build to reduce size
 
   close_pull_request_job:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
