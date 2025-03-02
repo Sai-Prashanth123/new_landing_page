@@ -29,20 +29,31 @@ jobs:
           rm -rf node_modules package-lock.json .next
           npm install --legacy-peer-deps
 
-      - name: Build Project
+      - name: Optimize Next.js Build
         run: |
-          export NEXT_DISABLE_SOURCEMAPS=1  # ✅ Reduce build size
-          npm run build || { echo "Build failed. Check logs above."; exit 1; } # ✅ Fail fast if build fails
+          export NEXT_DISABLE_SOURCEMAPS=1  # ✅ Reduces build size
+          export NODE_ENV=production
+          npm run build || { echo "❌ Build failed. Check logs above."; exit 1; }
 
-      - name: Check `.next` Folder Exists
+      - name: Check Build Size
         run: |
           if [ -d ".next" ]; then
-            echo "✅ .next folder exists. Proceeding..."
-            du -sh .next  # ✅ Show size only if exists
+            echo "✅ .next folder exists. Checking size..."
+            du -sh .next  # ✅ Show size for debugging
+            find .next -type f -exec ls -lh {} + | sort -k5,5 -hr | head -20  # ✅ Show top 20 largest files
           else
             echo "❌ .next folder not found! Build may have failed."
-            exit 1  # ✅ Stop deployment if build failed
+            exit 1
           fi
+
+      - name: Reduce Deployment Size
+        run: |
+          echo "Deleting unnecessary files to reduce size..."
+          rm -rf .next/cache  # ✅ Remove cache to reduce size
+          rm -rf node_modules  # ✅ Ensure no unnecessary modules
+          rm -rf .git  # ✅ Exclude Git metadata
+          rm -rf tests  # ✅ If you have a test folder, exclude it
+          du -sh .next  # ✅ Check new size after cleanup
 
       - name: Deploy to Azure Static Web Apps
         id: builddeploy
@@ -51,10 +62,11 @@ jobs:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           action: "upload"
-          app_location: "."  # ✅ Ensure this points to the correct build location
+          app_location: "."  # ✅ Ensure correct path
           api_location: ""  
           output_location: ".next"
           skip_api_build: true  # ✅ Ensures no unnecessary API deployment
+          app_build_command: "npm run build"  # ✅ Ensures only built files are uploaded
 
   close_pull_request_job:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
