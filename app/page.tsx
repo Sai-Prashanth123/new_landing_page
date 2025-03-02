@@ -1,8 +1,8 @@
-import NavBar from "@/components/NavBar";
-import { Button } from "@/components/ui/button";
+import NavBar from "@/components/navbar";
+import { Button } from "@/components/ui/Button";
 import Image from "next/image";
 import Goodbye from "@/components/Goodbye";
-import Footer from "@/components/Footer";
+import Footer from "@/components/footer";
 import HeroImage from "@/components/HeroImage";
 import Corousal from "@/components/Corousal";
 import Last from "@/components/Last";
@@ -10,6 +10,8 @@ import Flake from "@/components/Flake";
 import MasonryCarousel from "@/components/Testimonial";
 import Faq from "@/components/Faq";
 import type { Metadata } from 'next'
+import { Input } from '@/components/ui/Input';
+
 
 export const metadata: Metadata = {
   title: 'JobSpring | AI-Powered Job Search Tools & Career Resources',
