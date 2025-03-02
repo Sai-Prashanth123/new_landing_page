@@ -4,27 +4,23 @@
     "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
-    "strict": false,
-    "noEmit": false,
+    "strict": true,  // ✅ Set to `true` for better TypeScript checks
+    "noEmit": true,  // ✅ Prevents emitting compiled files
     "esModuleInterop": true,
     "module": "esnext",
-    "moduleResolution": "bundler",
+    "moduleResolution": "node",  // ✅ Changed to `node` for better compatibility
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "preserve",
     "incremental": true,
-    "baseUrl": ".", 
+    "baseUrl": "src",  // ✅ Updated to "src" to match project structure
     "paths": {
-      "@/*": ["src/*"],  // ✅ Fix: Ensure it points to `src/` if using Next.js convention
-      "@/components/*": ["src/components/*"], // ✅ Added specific paths for components
-      "@/utils/*": ["src/utils/*"],  // ✅ Added utilities folder alias
-      "@/styles/*": ["src/styles/*"] // ✅ Added styles folder alias
+      "@/*": ["*"],  // ✅ Root alias
+      "@/components/*": ["components/*"],  // ✅ Components alias
+      "@/utils/*": ["utils/*"],  // ✅ Utilities alias
+      "@/styles/*": ["styles/*"]  // ✅ Styles alias
     },
-    "plugins": [
-      {
-        "name": "next"
-      }
-    ]
+    "plugins": [{ "name": "next" }]
   },
   "include": [
     "next-env.d.ts",
