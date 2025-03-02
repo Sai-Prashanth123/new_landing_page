@@ -25,15 +25,21 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 18
+          cache: "npm"
 
       - name: Install dependencies
         run: npm ci --omit=dev # Ensures only production dependencies
 
-      - name: Build project
-        run: npm run build
+      - name: Disable Next.js Telemetry
+        run: npx next telemetry disable
 
-      - name: Export Next.js static site
-        run: npm run export # Only for static sites
+      - name: Fix Case Sensitivity Issues (Linux)
+        run: |
+          find . -depth -name "*[A-Z]*" -exec bash -c 'mv "$0" "${0,,}"' {} \;
+        continue-on-error: true
+
+      - name: Build Next.js Project
+        run: npm run build
 
       - name: Deploy to Azure Static Web Apps
         id: builddeploy
@@ -42,9 +48,11 @@ jobs:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           action: "upload"
-          app_location: "/" 
-          api_location: "" # Set API location only if needed
-          output_location: "out" # Use static export if possible
+          ###### Repository/Build Configurations ######
+          app_location: "/"  # App source code path
+          api_location: ""   # API source code path (leave empty if not used)
+          output_location: ".next" # Use Next.js build output
+          ###### End of Repository/Build Configurations ######
 
   close_pull_request_job:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
