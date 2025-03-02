@@ -24,16 +24,18 @@ jobs:
           node-version: 18
           cache: "npm"
 
-      - name: Clean Install Dependencies
+      - name: Ensure Correct Dependencies
         run: |
           rm -rf node_modules package-lock.json .next
-          npm install --omit=dev  # ✅ Install only production dependencies
+          npm install --omit=dev # ✅ Install only production dependencies
 
-      - name: Validate Path Aliases
-        run: cat tsconfig.json | grep paths  # ✅ Debug paths
+      - name: Check for Case Sensitivity Issues
+        run: |
+          find components -type f | grep -i "footer"
+          find components -type f | grep -i "navbar"
 
-      - name: Ensure Case-Sensitivity Fix
-        run: find components -type f | grep -i "footer"
+      - name: Validate TypeScript Paths
+        run: cat tsconfig.json | grep paths  # ✅ Debug alias paths
 
       - name: Build Project
         run: |
