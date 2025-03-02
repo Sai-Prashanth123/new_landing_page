@@ -17,9 +17,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
-        with:
-          submodules: false
-          lfs: false
 
       - name: Setup Node.js
         uses: actions/setup-node@v3
@@ -27,16 +24,16 @@ jobs:
           node-version: 18
           cache: "npm"
 
-      - name: Install dependencies
-        run: npm ci --omit=dev # Ensures only production dependencies
-
-      - name: Disable Next.js Telemetry
-        run: npx next telemetry disable
-
-      - name: Fix Case Sensitivity Issues (Linux)
+      - name: Clean Install Dependencies
         run: |
-          find . -depth -name "*[A-Z]*" -exec bash -c 'mv "$0" "${0,,}"' {} \;
-        continue-on-error: true
+          rm -rf node_modules package-lock.json .next
+          npm install
+
+      - name: Force Reinstall Next.js
+        run: npm install next@latest --force
+
+      - name: Debug Installed Modules
+        run: ls -la node_modules/next/dist/lib/typescript
 
       - name: Build Next.js Project
         run: npm run build
@@ -48,11 +45,9 @@ jobs:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           action: "upload"
-          ###### Repository/Build Configurations ######
-          app_location: "/"  # App source code path
-          api_location: ""   # API source code path (leave empty if not used)
-          output_location: ".next" # Use Next.js build output
-          ###### End of Repository/Build Configurations ######
+          app_location: "/"
+          api_location: ""
+          output_location: ".next"
 
   close_pull_request_job:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
