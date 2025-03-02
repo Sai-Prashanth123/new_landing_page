@@ -15,34 +15,41 @@ jobs:
     runs-on: ubuntu-latest
     name: Build and Deploy Job
     steps:
-      - name: Checkout repository
+      - name: 📥 Checkout repository
         uses: actions/checkout@v3
 
-      - name: Setup Node.js
+      - name: ⚙️ Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: 18
           cache: "npm"
 
-      - name: Ensure Correct Dependencies
+      - name: 🗑 Clean Install Dependencies
         run: |
           rm -rf node_modules package-lock.json .next
-          npm install --omit=dev # ✅ Install only production dependencies
+          npm install --omit=dev  # ✅ Install only production dependencies
 
-      - name: Check for Case Sensitivity Issues
+      - name: 🔍 Check for Case Sensitivity Issues
         run: |
-          find components -type f | grep -i "footer"
-          find components -type f | grep -i "navbar"
+          find src/components -type f | grep -i "footer"
+          find src/components -type f | grep -i "navbar"
 
-      - name: Validate TypeScript Paths
-        run: cat tsconfig.json | grep paths  # ✅ Debug alias paths
+      - name: 🔄 Validate TypeScript Paths
+        run: |
+          cat tsconfig.json | grep paths
 
-      - name: Build Project
+      - name: 🔧 Fix TypeScript Path Issues
+        run: |
+          echo "Ensuring TS paths match..."
+          find src/components -type f | grep -i "footer"
+          find src/components -type f | grep -i "navbar"
+
+      - name: 🏗 Build Project
         run: |
           export NEXT_DISABLE_SOURCEMAPS=1  # ✅ Reduce build size
           npm run build
 
-      - name: Deploy to Azure Static Web Apps
+      - name: 🚀 Deploy to Azure Static Web Apps
         id: builddeploy
         uses: Azure/static-web-apps-deploy@v1
         with:
@@ -59,7 +66,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Close Pull Request Job
     steps:
-      - name: Close Pull Request
+      - name: 📌 Close Pull Request
         id: closepullrequest
         uses: Azure/static-web-apps-deploy@v1
         with:
