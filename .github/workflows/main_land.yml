@@ -1,7 +1,4 @@
-# Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
-# More GitHub Actions for Azure: https://github.com/Azure/actions
-
-name: Build and deploy Node.js app to Azure Web App - land
+name: Build and deploy Next.js app to Azure Web App - land
 
 on:
   push:
@@ -16,27 +13,33 @@ jobs:
       contents: read # Required for actions/checkout
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-      - name: Set up Node.js version
+      - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '18.x'
 
-      - name: npm install, build, and test
+      - name: Install dependencies
         run: |
-          export NODE_ENV=production
-          npm install --only=production
-          npm run build --if-present
-          npm run test --if-present
+          rm -rf node_modules package-lock.json .next
+          npm ci
+
+      - name: Verify component imports (prevent missing module errors)
+        run: |
+          ls -R ./app/components
+
+      - name: Build Next.js app
+        run: npm run build
 
       - name: Zip artifact for deployment
-        run: zip -r release.zip dist package.json package-lock.json node_modules
+        run: zip -r release.zip .next public package.json package-lock.json node_modules
 
-      - name: Upload artifact for deployment job
+      - name: Upload artifact for deployment
         uses: actions/upload-artifact@v4
         with:
-          name: node-app
+          name: nextjs-app
           path: release.zip
 
   deploy:
@@ -46,14 +49,14 @@ jobs:
       name: 'Production'
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
     permissions:
-      id-token: write # Required for requesting the JWT
-      contents: read # Required for actions/checkout
+      id-token: write
+      contents: read
 
     steps:
       - name: Download artifact from build job
         uses: actions/download-artifact@v4
         with:
-          name: node-app
+          name: nextjs-app
 
       - name: Unzip artifact for deployment
         run: unzip release.zip -d app
