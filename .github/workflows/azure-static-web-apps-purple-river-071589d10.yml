@@ -51,6 +51,16 @@ jobs:
           rm -rf .next/cache node_modules .git tests || true
           du -sh .next || echo "⚠ Failed to check size after cleanup"
 
+      - name: Upload API Separately (Optional for Large APIs)
+        run: |
+          if [ -d "api" ]; then
+            echo "Zipping and uploading API separately..."
+            zip -r api.zip api
+            du -sh api.zip
+          else
+            echo "⚠ No API folder found. Skipping API upload..."
+          fi
+
       - name: Deploy to Azure Static Web Apps
         id: builddeploy
         uses: Azure/static-web-apps-deploy@v1
@@ -59,9 +69,9 @@ jobs:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           action: "upload"
           app_location: "."  # ✅ Ensure correct path
-          api_location: ""  
+          api_location: "api"  # ✅ Specify API path
           output_location: ".next"
-          skip_api_build: true  
+          skip_api_build: true  # ✅ Avoid unnecessary builds
           app_build_command: "npm run build"
         continue-on-error: true  # ✅ Ignore errors and continue
 
