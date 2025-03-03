@@ -1,7 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  output: 'standalone', // Reduces size for Azure deployment
   images: {
-    domains: ['Jobspring.org']
+    domains: ['Jobspring.org'],
+    unoptimized: true, // Avoids large image processing files
   },
   eslint: {
     ignoreDuringBuilds: true, // Disables ESLint during build
@@ -9,6 +11,6 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: true, // Disables type checking during build
   },
-}
+};
 
-module.exports = nextConfig 
+module.exports = nextConfig;
